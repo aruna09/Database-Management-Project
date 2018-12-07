@@ -1,0 +1,183 @@
+﻿create table inventor(
+invt_id int,
+invt_fname varchar(20),
+invt_lname varchar(20),
+invt_DoB varchar(20),
+invt_country varchar(20),
+primary key (invt_id)
+);
+
+alter table inventor 
+	alter column invt_DoB type date using invt_dob::date;
+	
+create table invention(
+inv_id int,
+inv_name varchar(20),
+inv_year int,
+field_code varchar(10),
+pat_id varchar(10),
+invt_id int,
+
+foreign key (invt_id) references inventor,
+foreign key (pat_id) references patent,
+foreign key (field_code) references field,
+primary key (inv_id)
+);
+
+create table patent(
+pat_id varchar(10),
+app_no varchar(10),
+primary key (pat_id)
+);
+
+create table field(
+field_code varchar(10),
+primary key (field_code),
+field_name varchar(10)
+);
+
+create table awards(
+awd_id varchar(20),
+awd_name varchar(20),
+no_jury int,
+primary key (awd_id)
+);
+
+create table belongs(
+field_code varchar(10),
+inv_id int,
+foreign key (field_code) references field,
+foreign key (inv_id) references invention
+);
+
+create table invents(
+invt_id int,
+inv_id int,
+foreign key (invt_id) references inventor,
+foreign key (inv_id) references invention
+);
+create table nominated(
+inv_id int,
+invt_id int,
+nom_id varchar(10),
+nom_yr int,
+foreign key (invt_id) references inventor,
+foreign key (inv_id) references invention
+);
+	
+create table receives(
+inv_id int,
+awd_id varchar(10),
+foreign key (inv_id) references invention,
+foreign key (awd_id) references awards
+);
+
+alter table receives add column invt_id int;
+alter table receives add foreign key (invt_id) references inventor;
+alter table receives add column awd_yr int;
+update receives set awd_yr=2011 where inv_id=142;
+update receives set awd_yr=1985 where inv_id=112;
+update receives set awd_yr=1999 where inv_id=178;
+update receives set awd_yr=1987 where inv_id=452;
+update receives set awd_yr=1979 where inv_id=751;
+
+insert into inventor values(1, 'Big', 'Man', '12-11-1998', 'India');
+insert into inventor values(2, 'Big', 'Woman', '10-09-2000', 'Bali');
+insert into inventor values(3, 'Small', 'Man', '02-04-2001', 'India');
+insert into inventor values(4, 'Small', 'Woman', '04-06-1998', 'Jerusalem');
+insert into inventor values(5, 'Little', 'Man', '07-08-1999', 'Jerusalem');
+
+insert into patent values('pat1', 'appno1');
+insert into patent values('pat2', 'appno2');
+insert into patent values('pat3', 'appno3');
+insert into patent values('pat4', 'appno4');
+insert into patent values('pat5', 'appno5');
+
+insert into field values('F1', 'Math');
+insert into field values('F2', 'Economics');
+insert into field values('F3', 'Biology');
+insert into field values('F4', 'Mechanics');
+insert into field values('F5', 'CompSci');
+
+insert into invention values(142, 'Telephone', '1954', 'F5', 'pat1', 1);
+insert into invention values(112, 'Calculator', '1952', 'F1', 'pat2', 5);
+insert into invention values(178, 'Compass', '1698', 'F1', 'pat3', 2);
+insert into invention values(452, 'PaceMaker', '1998', 'F3', 'pat4', 4);
+insert into invention values(741, 'Car', '2000', 'F4', 'pat5', 4);
+
+insert into receives values(142,'AW01', 1);
+insert into receives values(142,'AW01', 2);
+insert into receives values(112,'AW04', 5);
+insert into receives values(452,'AW03', 4);
+insert into receives values(741,'AW03', 4);
+
+insert into belongs values('F5', 142);
+insert into belongs values('F1', 112);
+insert into belongs values('F1', 178);
+insert into belongs values('F3', 452);
+insert into belongs values('F4', 741);
+
+
+insert into awards values('AW01', 'Turing Award', 5);
+insert into awards values('AW02', 'Curie Award', 12);
+insert into awards values('AW03', 'Nobel Prize', 6);
+insert into awards values('AW04', 'Fields Medal', 8);
+insert into awards values('AW05', 'Kalinga Prize', 5);
+insert into awards values('AW07', 'Oscar Award', 3);
+
+insert into nominated values(142, 1, 'AW01', 2013);
+insert into nominated values(112, 5, 'AW04', 2017);
+insert into nominated values(142, 2, 'AW01', 1945);
+insert into nominated values(452, 4, 'AW03', 2000);
+insert into nominated values(741, 4, 'AW03', 2015);
+insert into nominated values(741, 1, 'AW11', 2015);
+
+
+insert into invents values(1, 142);
+insert into invents values(5, 112);
+insert into invents values(2, 142);
+insert into invents values(4, 452);
+insert into invents values(4, 741);
+
+select * from invention;
+select * from inventor;
+select * from awards;
+select * from field;
+select * from patent;
+select * from nominated;
+select * from belongs;
+select * from receives;
+select * from invents;
+
+## Aggregate function and group by
+select inv_id, count(awd_id) from receives group by inv_id;
+
+## Order by
+select inv_id, inv_name from invention where inv_year<1998 order by inv_year;
+
+## Natural Join
+select * from patent NATURAL JOIN invention;
+
+## Boolean operator
+select inv_name, invt_id from invention where field_code='F1' or field_code='F3';
+
+## Arithmetic Operators
+select invt_DoB, (invt_DoB-INTERVAL '1 DAY')as one_day_int from inventor;
+
+## String operator
+select invt_fname, invt_lname, invt_id from inventor where invt_lname like 'Wo%';
+
+## Extract age using current_date
+Select *, extract (year from age(current_Date,invt_DoB)) as "Age" from inventor;
+
+## Using between
+select inv_id from receives where awd_yr between 1979 and 2011;
+
+## Set operation intersect
+(select inv_id, inv_name from invention natural join inventor where invt_lname='Man') intersect (select inv_id, inv_name from invention natural join inventor where invt_country='India');
+
+## Subquery using exists
+select invt_lname from inventor where exists (select * from awards, nominated where awards.awd_id = nominated.nom_id);
+
+## Subquery
+select * from patent where pat_id in(select pat_id from invention natural join field where field_name='Biology');
