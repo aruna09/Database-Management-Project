@@ -1,7 +1,7 @@
 # Database-Management-Project
 Consists of a database to manage inventions, implemented using postgres.
 
-The project has been implemented as a part of Semester 6 course project. </br>
+The project has been implemented as a part of Semester 5 course project. </br>
 
 
 Invention Management System consists of a database, keeping a record and managing
